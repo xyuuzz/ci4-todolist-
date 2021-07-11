@@ -38,8 +38,11 @@ class ToDoListController extends BaseController
 
 	public function edit($slug)
 	{
+		$user = user()->toArray();
 		$title = "Sunting Jadwal";
 		$tdl = $this->tdlist->getToDoList($slug);
-		return view("todolist/update", compact("title", "tdl"));
+
+		session()->setFlashData("edit", true);
+		return view("todolist/create", compact("title", "tdl", "user"));
 	}
 }

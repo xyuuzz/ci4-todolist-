@@ -19,6 +19,7 @@ class AjaxTDLController extends ResourceController
 
 	public function create()
 	{
+		$this->tdl->changeValidationRules();
 		$slug = uniqid() . "-" . user()->toArray()["username"];
 		
 		$banner = $this->request->getFile("banner");
@@ -51,26 +52,39 @@ class AjaxTDLController extends ResourceController
 		$tdl = $this->tdl->getToDoList($slug);
 
 		$fields = [
-			"id" => $tdl->id,
-			"title" => $this->request->getPost("title"),
-			"desc" => $this->request->getPost("desc"),
-			"due_date" => $this->request->getPost("due_date"),
-			"status" => 0
+			"id" => $tdl["id"],
+			"title" => $this->request->getVar("title"),
+			"desc" => $this->request->getVar("desc"),
+			"due_date" => $tdl["due_date"],
+			"status" => $tdl["status"]
 		];
 
-		if($this->request->getFile("banner"))
+
+		if($this->request->getFile("banner")->getError() !== 4)
 		{
 			$banner = $this->request->getFile("banner");
 			$banner_name = $banner->getRandomName();
-			$banner->move("banners", $banner_name);
 			
 			$fields["banner"] = $banner_name;
 		}
-
-		$tdl->save($fields);
 		
-		session()->setFlashData("success", "Berhasil mensuntung data jadwal");
-		return $this->respond(["result" => "success"]);
+		if($this->tdl->save($fields) === false)
+		{
+			return $this->respond(["error" => $this->tdl->errors(), "result" => false]);
+		}
+		else
+		{
+			if(isset($banner))
+			{
+				unlink("banners/{$tdl['banner']}");
+				$banner->move("banners", $banner_name);
+			}
+		}
+
+		
+		
+		session()->setFlashData("success", "Berhasil mensunting data jadwal");
+		return $this->respond(["result" => true]);
 	}
 
 	public function deleted($slug)

@@ -25,14 +25,14 @@ class ToDoList extends Model
 
 	// Validation
 	protected $validationRules = [
-        'banner'         => 'uploaded[banner]|is_image[banner]|max_size[banner, 1024]|mime_in[banner,image/png,image/jpg,image/jpeg]|ext_in[banner,png,jpeg,jpg]',
+        'banner'         => 'is_image[banner]|max_size[banner, 1024]|mime_in[banner,image/png,image/jpg,image/jpeg]|ext_in[banner,png,jpeg,jpg]',
         'title'      => 'required|string|min_length[5]|max_length[200]',
         'desc' => 'required|string|min_length[30]|max_length[2000]',
 		"due_date" => "required|date"
     ];
+
     protected $validationMessages = [
 		"banner" => [
-			"uploaded" => "Wajib meng-uploade gambar!",
 			"max_size" => "Max ukuran gambar adalah 1 MB",
 			"mime_in" => "Gambar harus memiliki ekstensi png, jpeg atau jpg",
 			"ext_in" => "Gambar harus memiliki ekstensi png, jpeg atau jpg",
@@ -52,7 +52,6 @@ class ToDoList extends Model
 		"due_date" => [
 			"required" => "Field Tanggal wajib diisi!",
 			"date" => "Field tanggal harus memiliki format tanggal, tidak boleh yang lain",
-			"valid_date" => "Format tanggal yang anda masukan tidak valid"
 		]
 	];
 	protected $skipValidation       = false;
@@ -86,5 +85,11 @@ class ToDoList extends Model
 		}
 		
 		return $this->all();
+	}
+
+	public function changeValidationRules()
+	{
+		$this->validationRules["banner"] .= "|uploaded[banner]";
+		$this->validationMessages["banner"]["uploaded"] = "Wajib mengunggah foto jadwal / tugas";
 	}
 }

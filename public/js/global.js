@@ -35,6 +35,19 @@ $(document).ready(function ()
         window.history.replaceState(stateObj, "Buat Jadwal", `${url}/buat/todolist`);
     });
 
+
+    // ketika class update-tdl di klik, maka :
+    $(".update-tdl").on( "click", e => {
+        const slug = $(e.target).data("tdl")
+        
+        $("body").load(`${url}/sunting/${slug}/todolist`);
+        $("title").html("Sunting Jadwal"); // ganti title website
+        // lalu ubah url nya
+        let stateObj = { id: "100" };
+        window.history.replaceState(stateObj, "Sunting Jadwal", `${url}/sunting/${slug}/todolist`);
+    } );
+
+
     // ketika kelas back-tom (back to home) button di klik, maka :
     $(".back-tom").on("click", () => {
         $("body").load(`${url}`); // load halaman dengan url disamping
@@ -44,8 +57,10 @@ $(document).ready(function ()
         window.history.replaceState(stateObj, "Home", `${url}`);
     });
 
+
+
     // ketika kelas delete-tdl ditekan, maka :
-    $(".delete-tdl").on( "click", (e) => {
+    $(".delete-tdl").on( "click", e => {
         // ambil attribute data bernama tdl dari element e.target, masukan ke dalam var slug
         const slug = $(e.target).data("tdl");
         
@@ -71,6 +86,9 @@ $(document).ready(function ()
                 $(".alert.alert-danger").removeClass("d-none");
             });        
     } );
+
+
+    // dibawah adalah action daripada url tambah data
 
     // jika ada form di submit
     $("form").on("submit", e => {
@@ -118,6 +136,49 @@ $(document).ready(function ()
                 $(".alert.alert-danger").removeClass("d-none");   
             });
     });
+
+    $(".update").on( "click", e => {
+        // data.set("banner", $("#banner")[0]);
+        // let data_obj = {};
+        // for (const [key, value] of data.entries()) {
+        //     data_obj[key] = value;
+        // }
+        const slug = $(e.target).data("tdl");
+        let data = new FormData($("#dataForm")[0]);
+
+        fetch(`${url}/todolist/update/${slug}`, {
+            method : "POST",
+            body : data
+        })
+            .then(response => response.json() )
+
+            .then(result => {
+                // jika obj result dari result pada parameter bernilai true
+                if(result.result)
+                {
+                    $("body").load(`${url}/sunting/${slug}/todolist`)
+                }
+                else // jika bernilai false, maka terjadi error
+                {
+                    // datar value attribute name pada input..
+                    const name_input = ["banner", "title", "desc", "due_date"];
+                    name_input.map( name => { // lalu kita map
+                        // kita spread key dari obeject result.error, dan kita masukan ke dalam array
+                        // jika name pada nama_input ada pada obj result.error
+                        if( [...Object.keys(result.error)].indexOf(name) !== -1) {
+                            $(`input[name='${name}']`).addClass("is-invalid"); // tambahkan class is-invalid
+                        } else { // jika tidak ada / bernilai -1, 
+                            $(`input[name='${name}']`).removeClass("is-invalid"); // hapus class is-invalid
+                        }
+                    } );
+                }
+            })
+
+            .catch(err => {
+                // $("body").load(`${url}/buat/todolist`);
+                $(".alert.alert-danger").removeClass("d-none");   
+            });
+    } );
 });
 
 
