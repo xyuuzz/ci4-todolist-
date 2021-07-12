@@ -92,4 +92,11 @@ class ToDoList extends Model
 		$this->validationRules["banner"] .= "|uploaded[banner]";
 		$this->validationMessages["banner"]["uploaded"] = "Wajib mengunggah foto jadwal / tugas";
 	}
+
+	public function searchData($query)
+	{
+		return $this->db->table("todolists")
+				->like("title", "%$query%")
+				->get();
+	}
 }

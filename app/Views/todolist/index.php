@@ -4,6 +4,8 @@
 
 <button class="btn btn-lg btn-outline-secondary mb-3 create-button">Buat Jadwal</button>
 
+<input type="text" class="form-control mt-3 mb-3 col-lg-4 searchInput d-none-sm" placeholder="Cari jadwal / tugas">
+
 <?php if(session("success")) : ?>
     <div class="alert alert-success" role="alert">
         <?= session("success") ?>
@@ -19,7 +21,7 @@
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">List To Do List yang telah dibuat</h6>
     </div>
-    <div class="card-body container-fluid">
+    <div class="card-body container-fluid dataTdl">
         <?php foreach($data as $tdl) : ?>
             <div class="card mb-5">
                 <div class="card-header">
@@ -30,21 +32,12 @@
                         <img class="img-thumbnail" src="<?= base_url() ?>/banners/<?= $tdl->banner ?>" alt="thumbnail jadwal" width="300">
                         <div class="ml-lg-5 mt-3">
                             <p><b>Deskripsi Jadwal :</b> <?= $tdl->desc ?></p>
-                            <p><b>Deadline : </b> <?= date_format(date_create($tdl->due_date), "d/m/Y") ?></p>
-                            <p><b>Status : </b>
-                            <?php if($tdl->status) : ?>
-                                <span class="btn btn-success btn-sm">Selesai</span>
-                            <?php elseif(!$tdl->status && date_format(date_create("now"), "Y-m-d H:I:s" ) < $tdl->due_date) : ?>
-                                <span class="btn btn-warning btn-sm">Belum Tuntas</span>
-                            <?php else : ?>
-                                <span class="btn btn-danger btn-sm">Tidak Tuntas</span>
-                            <?php endif; ?>
-                            </p>
                         </div>
                     </div>
                     <div class="float-lg-right mt-sm-3">
-                        <button class="btn btn-danger btn-sm delete-tdl" data-tdl="<?= $tdl->slug ?>">Hapus</button>
-                        <button class="btn btn-primary btn-sm update-tdl" data-tdl="<?= $tdl->slug ?>">Sunting</button>
+                        <!-- <button class="btn btn-danger btn-sm delete-tdl" data-tdl="<?= $tdl->slug ?>">Hapus</button>
+                        <button class="btn btn-primary btn-sm update-tdl" data-tdl="<?= $tdl->slug ?>">Sunting</button> -->
+                        <button class="btn btn-outline-info btn-sm show-tdl mr-4" data-tdl="<?= $tdl->slug ?>">Detail</button>
                     </div>
                 </div>
             </div>

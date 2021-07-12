@@ -29,6 +29,15 @@ class ToDoListController extends BaseController
 		return view("todolist/index", compact("title", "data", "user"));
 	}
 
+	public function show($slug)
+	{
+		$user = user()->toArray();
+		$title = "Detail Jadwal";
+		$tdl = $this->tdlist->getToDoList($slug);
+
+		return view("todolist/show", compact("title", "user", "tdl"));
+	}
+
 	public function create()
 	{
 		$user = user()->toArray();
@@ -41,8 +50,10 @@ class ToDoListController extends BaseController
 		$user = user()->toArray();
 		$title = "Sunting Jadwal";
 		$tdl = $this->tdlist->getToDoList($slug);
+		
+		$back_to = base_url() . "/show/detail/$slug";
 
 		session()->setFlashData("edit", true);
-		return view("todolist/create", compact("title", "tdl", "user"));
+		return view("todolist/create", compact("title", "tdl", "user", "back_to"));
 	}
 }

@@ -2,7 +2,9 @@
 
 <?php $this->section("content") ?>
 
-<button class="btn btn-lg btn-outline-secondary mb-3 back-tom">Kembali</button>
+<button class="btn btn-lg btn-outline-secondary mb-3 back-tom" 
+        data-backto="<?= session("edit") ? $back_to : "" ?>">
+        Kembali</button>
 
 <?php if(session("success")) : ?>
     <div class="alert alert-success" role="alert">

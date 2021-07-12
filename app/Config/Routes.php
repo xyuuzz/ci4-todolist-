@@ -35,11 +35,13 @@ $routes->setAutoRoute(true);
 
 // as digunakan untuk memberi nama pada route nya :)
 $routes->get('/', 'ToDoListController::index', ["as" => "home"]);
+$routes->get("/show/detail/(:any)", "ToDoListController::show/$1");
 $routes->get("/buat/todolist", "ToDoListController::create", ["as" => "create"]);
 $routes->post("/todolist/store", "AjaxTDLController::create");
 $routes->get('/sunting/(:any)/todolist', 'ToDoListController::edit/$1');
 $routes->delete("/todolist/delete/(:any)", "AjaxTDLController::deleted/$1");
 $routes->patch("/todolist/update/(:any)", "AjaxTDLController::updated/$1");
+$routes->post("/search/todolist/(:any)", "AjaxTDLController::search/$1");
 
 
 /*

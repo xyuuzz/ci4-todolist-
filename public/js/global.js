@@ -8,24 +8,49 @@ function previewImage()
   };
 }
 
-function fetchData(url, method)
+function fetchData(url, method, destination)
 {
-    fetch(`http://localhost:8080/todolist/store`, {
+    const data = new FormData($("#dataForm")[0]);
+    fetch(url, {
         method : method,
-        credentials : "same-origin",
-        mode : "cors",
-        body : new FormData($("#dataForm")[0])
+        body : data
     })
-        .then(response => console.log(response.json()))
-        .catch(err => {
-            console.log(err);    
-        });
+        .then(response => response.json() )
+            .then(result => {
+                // jika obj result dari result pada parameter bernilai true
+                if(result.result)
+                {
+                    $("body").load(destination);
+                    let stateObj = { id: "100" };
+                    window.history.replaceState(stateObj, "Page Website", destination);
+                }
+                else // jika bernilai false, maka terjadi error
+                {
+                    // datar value attribute name pada input..
+                    const name_input = ["banner", "title", "desc", "due_date"];
+                    name_input.map( name => { // lalu kita map
+                        // kita spread key dari obeject result.error, dan kita masukan ke dalam array
+                        // jika name pada nama_input ada pada obj result.error
+                        if( [...Object.keys(result.error)].indexOf(name) !== -1) {
+                            $(`input[name='${name}']`).addClass("is-invalid"); // tambahkan class is-invalid
+                        } else { // jika tidak ada / bernilai -1, 
+                            $(`input[name='${name}']`).removeClass("is-invalid"); // hapus class is-invalid
+                        }
+                    } );
+                }
+            })
+            .catch(err => {
+                $("body").load(`${url}`);
+                $(".alert.alert-danger").removeClass("d-none");   
+            });
 }
 
 
 $(document).ready(function ()
 {
     const url = "http://localhost:8080";
+
+
     // ketika kelas create button di klik, maka :
     $(".create-button").on("click", () => {
         $("body").load(`${url}/buat/todolist`); // load halaman dengan url disamping
@@ -49,12 +74,17 @@ $(document).ready(function ()
 
 
     // ketika kelas back-tom (back to home) button di klik, maka :
-    $(".back-tom").on("click", () => {
-        $("body").load(`${url}`); // load halaman dengan url disamping
-        $("title").html("Home"); // ganti title website
+    $(".back-tom").on("click", e => {
+        // jika attribut data bernama backto ada mempunyai value/tidak kosong pada el e, maka isikan value tersebut, jika tidak ada maka isi dengan url
+        const url_final = $(e.target).data("backto") ? $(e.target).data("backto") : url;
+        // jika url_final diatas sama dengan url, maka title nya diganti home, jika tidak maka detail jadwal
+        const title_website = url_final === url ? "Home" : "Detail Jadwal";
+        
+        $("body").load(`${url_final}`); // load halaman dengan url disamping
+        $("title").html(title_website); // ganti title website
         // lalu ubah url nya
         let stateObj = { id: "100" };
-        window.history.replaceState(stateObj, "Home", `${url}`);
+        window.history.replaceState(stateObj, "Page Website", `${url_final}`);
     });
 
 
@@ -98,87 +128,64 @@ $(document).ready(function ()
 
     // jika el dengan class submit ditekan, 
     $(".submit").on("click", () => {
-        let data = new FormData($("#dataForm")[0]);
-        fetch(`${url}/todolist/store`, {
-            method : "POST",
-            body : data
-        })
-            .then(response => response.json() )
-
-            .then(result => {
-                // jika obj result dari result pada parameter bernilai true
-                if(result.result)
-                {
-                    // load halaman home
-                    $("body").load(`${url}`)
-                    // lalu ubah url nya
-                    let stateObj = { id: "100" };
-                    window.history.replaceState(stateObj, "Home", `${url}`);
-                }
-                else // jika bernilai false, maka terjadi error
-                {
-                    // datar value attribute name pada input..
-                    const name_input = ["banner", "title", "desc", "due_date"];
-                    name_input.map( name => { // lalu kita map
-                        // kita spread key dari obeject result.error, dan kita masukan ke dalam array
-                        // jika name pada nama_input ada pada obj result.error
-                        if( [...Object.keys(result.error)].indexOf(name) !== -1) {
-                            $(`input[name='${name}']`).addClass("is-invalid"); // tambahkan class is-invalid
-                        } else { // jika tidak ada / bernilai -1, 
-                            $(`input[name='${name}']`).removeClass("is-invalid"); // hapus class is-invalid
-                        }
-                    } );
-                }
-            })
-
-            .catch(err => {
-                $("body").load(`${url}/buat/todolist`);
-                $(".alert.alert-danger").removeClass("d-none");   
-            });
+        fetchData(`${url}/todolist/store`, "POST", `${url}`)
     });
 
-    $(".update").on( "click", e => {
-        // data.set("banner", $("#banner")[0]);
-        // let data_obj = {};
-        // for (const [key, value] of data.entries()) {
-        //     data_obj[key] = value;
-        // }
+    $(".show-tdl").on( "click", e => {
         const slug = $(e.target).data("tdl");
-        let data = new FormData($("#dataForm")[0]);
+        $("body").load(`${url}/show/detail/${slug}`);
+        $("title").html("Detail Jadwal"); 
 
-        fetch(`${url}/todolist/update/${slug}`, {
-            method : "POST",
-            body : data
-        })
-            .then(response => response.json() )
+        let stateObj = { id: "100" };
+        window.history.replaceState(stateObj, "Page", `${url}/show/detail/${slug}`);
+    } )
 
-            .then(result => {
-                // jika obj result dari result pada parameter bernilai true
-                if(result.result)
-                {
-                    $("body").load(`${url}/sunting/${slug}/todolist`)
-                }
-                else // jika bernilai false, maka terjadi error
-                {
-                    // datar value attribute name pada input..
-                    const name_input = ["banner", "title", "desc", "due_date"];
-                    name_input.map( name => { // lalu kita map
-                        // kita spread key dari obeject result.error, dan kita masukan ke dalam array
-                        // jika name pada nama_input ada pada obj result.error
-                        if( [...Object.keys(result.error)].indexOf(name) !== -1) {
-                            $(`input[name='${name}']`).addClass("is-invalid"); // tambahkan class is-invalid
-                        } else { // jika tidak ada / bernilai -1, 
-                            $(`input[name='${name}']`).removeClass("is-invalid"); // hapus class is-invalid
-                        }
-                    } );
-                }
-            })
+    $(".update").on( "click", e => {
+        const slug = $(e.target).data("tdl");
+        // let data = new FormData($("#dataForm")[0]);
+        fetchData(`${url}/todolist/update/${slug}`, "POST", `${url}/show/detail/${slug}`);
+        // fetch(`${url}/todolist/update/${slug}`, {
+        //     method : "POST",
+        //     body : data
+        // })
+        //     .then(response => response.json() )
 
-            .catch(err => {
-                // $("body").load(`${url}/buat/todolist`);
-                $(".alert.alert-danger").removeClass("d-none");   
-            });
+        //     .then(result => {
+        //         // jika obj result dari result pada parameter bernilai true
+        //         if(result.result)
+        //         {
+        //             $("body").load(`${url}/sunting/${slug}/todolist`)
+        //         }
+        //         else // jika bernilai false, maka terjadi error
+        //         {
+        //             // datar value attribute name pada input..
+        //             const name_input = ["banner", "title", "desc", "due_date"];
+        //             name_input.map( name => { // lalu kita map
+        //                 // kita spread key dari obeject result.error, dan kita masukan ke dalam array
+        //                 // jika name pada nama_input ada pada obj result.error
+        //                 if( [...Object.keys(result.error)].indexOf(name) !== -1) {
+        //                     $(`input[name='${name}']`).addClass("is-invalid"); // tambahkan class is-invalid
+        //                 } else { // jika tidak ada / bernilai -1, 
+        //                     $(`input[name='${name}']`).removeClass("is-invalid"); // hapus class is-invalid
+        //                 }
+        //             } );
+        //         }
+        //     })
+
+        //     .catch(err => {
+        //         // $("body").load(`${url}/buat/todolist`);
+        //         $(".alert.alert-danger").removeClass("d-none");   
+        //     });
     } );
+
+    $(".searchInput").on( "keyup", function() {
+        fetch(`${url}/search/todolist/${$(this).val()}`, {
+            method : "POST",
+        })
+        .then(response => response.json() )
+            .then(result => $(".dataTdl").html(result.result) )
+            .catch(result => console.log(result))
+    } )
 });
 
 
