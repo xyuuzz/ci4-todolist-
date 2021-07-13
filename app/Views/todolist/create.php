@@ -60,8 +60,10 @@
                         <option value="1">Sudah Tuntas</option>
                     <?php else : ?>
                         <option value="0">Belum Tuntas</option>
+                        <option value="1">Sudah Tuntas</option>
                     <?php endif; ?>
                 </select>
+                <small>Cek Lagi Tugas/Jadwal mu ya, pastikan semuanya selesai.</small>
             </div>
             <?php endif; ?>
 

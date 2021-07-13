@@ -45,6 +45,16 @@ function fetchData(url, method, destination)
             });
 }
 
+function clickPaginate(el)
+{
+    const page = $(el).data("page");
+    const final_url = `http://localhost:8080?page_tdl=${page}`;
+    $("body").load(final_url);
+
+    const stateObj = {id : "100"};
+    window.history.replaceState(stateObj, "pagination", final_url);
+}
+
 
 $(document).ready(function ()
 {
@@ -118,8 +128,6 @@ $(document).ready(function ()
     } );
 
 
-    // dibawah adalah action daripada url tambah data
-
     // jika ada form di submit
     $("form").on("submit", e => {
         // hilangkan/cegah aksi default nya
@@ -128,6 +136,7 @@ $(document).ready(function ()
 
     // jika el dengan class submit ditekan, 
     $(".submit").on("click", () => {
+        // panggil fungsi fetch data
         fetchData(`${url}/todolist/store`, "POST", `${url}`)
     });
 
@@ -144,38 +153,6 @@ $(document).ready(function ()
         const slug = $(e.target).data("tdl");
         // let data = new FormData($("#dataForm")[0]);
         fetchData(`${url}/todolist/update/${slug}`, "POST", `${url}/show/detail/${slug}`);
-        // fetch(`${url}/todolist/update/${slug}`, {
-        //     method : "POST",
-        //     body : data
-        // })
-        //     .then(response => response.json() )
-
-        //     .then(result => {
-        //         // jika obj result dari result pada parameter bernilai true
-        //         if(result.result)
-        //         {
-        //             $("body").load(`${url}/sunting/${slug}/todolist`)
-        //         }
-        //         else // jika bernilai false, maka terjadi error
-        //         {
-        //             // datar value attribute name pada input..
-        //             const name_input = ["banner", "title", "desc", "due_date"];
-        //             name_input.map( name => { // lalu kita map
-        //                 // kita spread key dari obeject result.error, dan kita masukan ke dalam array
-        //                 // jika name pada nama_input ada pada obj result.error
-        //                 if( [...Object.keys(result.error)].indexOf(name) !== -1) {
-        //                     $(`input[name='${name}']`).addClass("is-invalid"); // tambahkan class is-invalid
-        //                 } else { // jika tidak ada / bernilai -1, 
-        //                     $(`input[name='${name}']`).removeClass("is-invalid"); // hapus class is-invalid
-        //                 }
-        //             } );
-        //         }
-        //     })
-
-        //     .catch(err => {
-        //         // $("body").load(`${url}/buat/todolist`);
-        //         $(".alert.alert-danger").removeClass("d-none");   
-        //     });
     } );
 
     $(".searchInput").on( "keyup", function() {

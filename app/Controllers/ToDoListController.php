@@ -23,10 +23,12 @@ class ToDoListController extends BaseController
 
 		$title = "Home";
 		$user = user()->toArray(); # ambil row user yang sedang login
-
+		
 		// dapatkan data dari table todolist dengan user_id yang dikirimkan
-		$data = $this->tdlist->where("user_id", user_id())->orderBy("created_at", "DESC")->get()->getResultObject();
-		return view("todolist/index", compact("title", "data", "user"));
+		$data = $this->tdlist->where("user_id", user_id())->orderBy("created_at", "DESC")->paginate(3, "tdl");
+		$pager = $this->tdlist->pager;
+
+		return view("todolist/index", compact("title", "data", "user", "pager"));
 	}
 
 	public function show($slug)

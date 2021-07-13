@@ -50,6 +50,7 @@ class AjaxTDLController extends ResourceController
 	public function updated($slug)
 	{
 		$tdl = $this->tdl->getToDoList($slug);
+
 		// jika status bernilai 0 / belum tuntas dan masih memiliki tenggat waktu, maka data bisa di sunting/update
 		if( !$tdl["status"] && date_format(date_create("now"), "Y-m-d H:I:s" ) < $tdl["due_date"] ) 
 		{
@@ -58,9 +59,8 @@ class AjaxTDLController extends ResourceController
 				"title" => $this->request->getVar("title"),
 				"desc" => $this->request->getVar("desc"),
 				"due_date" => $tdl["due_date"],
-				"status" => $tdl["status"]
+				"status" => !$tdl["status"] ? $this->request->getVar("status") : $tdl["status"]
 			];
-	
 	
 			if($this->request->getFile("banner")->getError() !== 4)
 			{
@@ -144,7 +144,10 @@ class AjaxTDLController extends ResourceController
 		}
 		else
 		{
-			foreach($this->tdl->orderBy("created_at", "DESC")->findAll() as $tdl)
+			$data = $this->tdl->where("user_id", user_id())->orderBy("created_at", "DESC")->paginate(3, "tdl");
+			$pager = $this->tdl->pager;
+			$result .= $pager->links("tdl", "custom_pagination");
+			foreach($data as $tdl)
 				{
 					$result .= 
 					'
