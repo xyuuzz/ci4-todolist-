@@ -2,9 +2,11 @@
 
 namespace App\Controllers;
 
+use Myth\Auth\Password;
 use App\Models\ToDoList;
-use CodeIgniter\RESTful\ResourceController;
+use Myth\Auth\Models\UserModel;
 use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\RESTful\ResourceController;
 
 class AjaxTDLController extends ResourceController
 {
@@ -176,5 +178,45 @@ class AjaxTDLController extends ResourceController
 
 
 		return $this->respond(["result" => $result]);
+	}
+
+	public function updateProfile()
+	{
+		$user = new UserModel();
+		$user_login = user()->toArray();
+
+		$fields = [
+			"id" => user_id(),
+			"fullname" => $this->request->getVar("fullname"),
+			"username" => $this->request->getVar("username"),
+			"email" => $this->request->getVar("email"),
+			"password" => $this->request->getVar("password") ? 
+					Password::hash($this->request->getVar("password")) 
+					: $user_login["password_hash"]
+		];
+
+		if($this->request->getFile("image")?->getError() !== 4)
+		{
+
+			$image = $this->request->getFile("image");
+			$image_name = $image->getRandomName();
+			
+			// store image
+			$image->move("profiles", $image_name);
+			if($user_login["image"] !== "default.svg")
+			{
+				unlink("profiles/{$user_login['image']}");
+			}
+			$fields["image"] = $image_name;
+		}
+		// return $this->respond(["result" => $fields]);
+
+		if($user->save($fields) === false)
+		{
+			return $this->respond(["result" => false, "error" => $user->errors()]);
+		}
+
+		session()->setFlashData("success", "Berhasil menyunting profile user anda!");
+		return $this->respond(["result" => true]);
 	}
 }

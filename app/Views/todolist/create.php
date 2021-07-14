@@ -17,7 +17,7 @@
         <h5><b><?= session("edit") ? "Sunting Jadwal" : "Buat Jadwal" ?></b></h5>
     </div>
     <div class="card-body border-top-primary container-fluid">
-        <form id="dataForm" class="user" enctype="multipart/form-data" method="POST" action="#">
+        <form class="user dataForm" enctype="multipart/form-data" method="POST" action="#">
             <?= csrf_field() ?>
             <?php if(session("edit")) : ?>
                 <input type="hidden" name="_method" value="PATCH">
@@ -66,12 +66,19 @@
                 <small>Cek Lagi Tugas/Jadwal mu ya, pastikan semuanya selesai.</small>
             </div>
             <?php endif; ?>
-
-            <button type="submit" class="btn btn-primary <?= session("edit") ? "update" : "submit" ?>" 
-            <?= session("edit") ? "data-tdl={$tdl['slug']}" : "" ?> >
-                <?= session("edit") ? "Sunting" : "Buat" ?>
-            </button>
         </form>
+
+        <!-- untuk insert batch kita garap besok saja -->
+        <?php if(!session("edit")) : ?>
+            <button type="button" class="btn btn-info d-block mb-3 mt-5" onclick="addRow(this)">
+                Tambahkan Form Jadwal
+            </button>
+        <?php endif; ?>
+
+        <button type="button" class="btn btn-primary <?= session("edit") ? "update" : "submit float-lg-right" ?>" 
+        <?= session("edit") ? "data-tdl={$tdl['slug']}" : "" ?> >
+            <?= session("edit") ? "Sunting" : "Buat" ?>
+        </button>
     </div>
 </div>
 

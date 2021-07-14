@@ -58,4 +58,12 @@ class ToDoListController extends BaseController
 		session()->setFlashData("edit", true);
 		return view("todolist/create", compact("title", "tdl", "user", "back_to"));
 	}
+
+	public function profile()
+	{
+		$title = "My Profile";
+		$user = user()->toArray();
+		
+		return view("profiles/index", compact("title", "user"));
+	}
 }

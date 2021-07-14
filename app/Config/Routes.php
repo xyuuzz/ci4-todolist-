@@ -43,6 +43,8 @@ $routes->delete("/todolist/delete/(:any)", "AjaxTDLController::deleted/$1");
 $routes->patch("/todolist/update/(:any)", "AjaxTDLController::updated/$1");
 $routes->post("/search/todolist/(:any)", "AjaxTDLController::search/$1");
 
+$routes->get("/profile", "ToDoListController::profile");
+$routes->patch("/profile/update", "AjaxTDLController::updateProfile");
 
 /*
  * --------------------------------------------------------------------
