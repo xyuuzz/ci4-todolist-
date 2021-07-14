@@ -17,7 +17,6 @@
         <form action="<?= base_url() ?>/profile/update" method="post" class="container profileForm">
             <?= csrf_field() ?>
             <input type="hidden" name="_method" value="PATCH">
-            <input type="hidden" name="row" value="1" class="rowCount">
 
             <p class="text-center">
                 <input id="banner" type="file" name="image" class="form-control-sm" onchange="previewImage()">

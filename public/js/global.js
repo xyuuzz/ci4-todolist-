@@ -1,11 +1,12 @@
-function previewImage()
+function previewImage(input = null)
 {
-  const inputImage = document.querySelector("#banner");
-  const image = new FileReader();
-  image.readAsDataURL(inputImage.files[0]);
-  image.onload = e => { // saat image sudah di load, maka :
-    $(".img-preview").attr("src", e.target.result);  // ganti value atribut src pada image
-  };
+    const inputImage = input ? input : document.querySelector("#banner");
+    const img_tag = input ? inputImage.nextElementSibling.nextElementSibling : $(".img-preview");
+    const image = new FileReader();
+    image.readAsDataURL(inputImage.files[0]);
+    image.onload = e => { // saat image sudah di load, maka :
+        $(img_tag).attr("src", e.target.result);  // ganti value atribut src pada image
+    };
 }
 
 function fetchData(url, method, destination)
@@ -57,16 +58,21 @@ function clickPaginate(el)
 
 function addRow(el)
 {
-    let row = parseInt( $(".rowCount").val() );
+    let el_tambahan = ``;
+    let length = $("input[name='row']").length;
+    let row = parseInt( $("input[name='row']")[length-1].value );
 
-    $(el).before( 
-    `
+    // jika row/jumlah form (sebelum dipencet tombol nya) adalah genap 
+    if(row % 2) 
+    {
+        el_tambahan += 
+        `
         <hr>
-        <form class="user dataForm" enctype="multipart/form-data" method="POST" action="#">
-            <input type="hidden" name="row" value="${1 + row}" class="rowCount">
+        <form class="user dataForm col-lg-6" enctype="multipart/form-data" method="POST" action="#">
+            <input type="hidden" name="row" value="${1 + row}">
             <div class="form-group">
                 <label for="banner">Gambar Tugas</label>
-                <input id="banner" type="file" class="form-control" id="validationServer03" aria-describedby="bannerValidate" name="banner" onchange="previewImage()">
+                <input id="banner" type="file" class="form-control" id="validationServer03" aria-describedby="bannerValidate" name="banner" onchange="previewImage(this)">
                 <div id="bannerValidate" class="invalid-feedback d-none">
                     
                 </div>
@@ -86,9 +92,51 @@ function addRow(el)
                 <input name="due_date" id="deadline" type="date" class="form-control" >
             </div>
         </form>
-    `
-    );
+        `;
+        // tambahkan el diatas setelah el yang memiliki class dataForm dengan index row-1, intinya akan dikasih di sebelahnya
+        $( $(".dataForm")[row-1] ).after(el_tambahan);
+    }
+    else
+    {
+        el_tambahan += 
+        `
+            <div class="d-lg-flex justify-content-between">
+                <form class="user dataForm col-lg-6" enctype="multipart/form-data" method="POST" action="#">
+                    <input type="hidden" name="row" value="${1 + row}" class="rowCount">
+                    <div class="form-group">
+                        <label for="banner">Gambar Tugas</label>
+                        <input id="banner" type="file" class="form-control" id="validationServer03" aria-describedby="bannerValidate" name="banner" onchange="previewImage(this)">
+                        <div id="bannerValidate" class="invalid-feedback d-none">
+                            
+                        </div>
+                        <img src="http://localhost:8080/banners/default.svg" alt="image preview" class="m-4 img-preview" width="200px">
+                    </div>
+                    <div class="form-group">
+                        <label for="title">Nama Jadwal</label>
+                        <input  name="title" id="title" type="text" class="form-control form-control-user" placeholder="MASUKAN NAMA JADWAL" >
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Deskripsi Jadwal</label>
+                        <textarea name="desc" id="description" cols="30" rows="10" class="form-control" ></textarea>
+                    </div>
 
+                    <div class="form-group">
+                        <label for="deadline">Deadline Tugas / Jadwal</label>
+                        <input name="due_date" id="deadline" type="date" class="form-control" >
+                    </div>
+                </form>
+            </div>
+        `;
+        
+        // cari el yang mempunyai class d-lg-flex
+        const el_div_flex = $(".d-lg-flex");
+        // cari last el yang mempunyai class d-lg-flex
+        const last = el_div_flex.length - 1;
+        // tambahkan el diatas setelah el d-flex terakhir
+        $(el_div_flex[last]).after(el_tambahan);
+    }
+
+    // scroll to bottom page
     window.scrollTo(0,document.body.scrollHeight);
 }
 
@@ -182,8 +230,60 @@ $(document).ready(function ()
 
     // jika el dengan class submit ditekan, 
     $(".submit").on("click", () => {
-        // panggil fungsi fetch data
-        fetchData(`${url}/todolist/store`, "POST", `${url}`)
+        const formTdl = $(".dataForm");
+
+        let t0 = performance.now();
+        [...formTdl].forEach( (el, index) => {
+            // fetchData(`${url}/todolist/store`, "POST", `${url}`)
+            const data = new FormData(el);
+            fetch(`${url}/todolist/store`, {
+                method : "POST",
+                body : data
+            })
+            .then(response => response.json())
+                .then(result => {
+                    
+                    // jika property dari obj param result bernilai true
+                    if(result.result)
+                    {
+                        $(el).html(
+                            `
+                                <small>Form Berhasil Dibuat!</small>
+                            `
+                        );
+                    }
+                    else
+                    {
+                        const name_input = ["banner", "title", "desc", "due_date"];
+                        name_input.map(name => {
+                            // kita spread key dari obeject result.error, dan kita masukan ke dalam array
+                            // jika name pada nama_input ada pada obj result.error
+                            const type_input = name != "desc" ? "input" : "textarea";
+
+                            if ([...Object.keys(result.error)].indexOf(name) !== -1) {
+                                // tambahkan class is-invalid
+                                $(el).find(`${type_input}[name='${name}']`).addClass("is-invalid");
+                            } else {
+                                // hapus class is-invalid
+                                $(el).find(`${type_input}[name='${name}']`).removeClass("is-invalid");
+                            }
+                        });
+                    }
+                })
+        });
+        let t1 = performance.now();
+        console.log(t0,t1);
+        setTimeout( () => {
+            console.log($(formTdl).find("input[name='row'").length)
+            console.log($("input").hasClass("is-invalid"))
+            // if(formTdl.length === 1 && $("input").hasClass("is-invalid") )
+            // {
+            //     $("body").load(`${url}`);
+            //     let stateObj = { id: "100" };
+            //     window.history.replaceState(stateObj, "Page Website", `${url}`);
+            // }
+            // else{console.log("gagal")}
+        }, );
     });
 
 
@@ -211,6 +311,14 @@ $(document).ready(function ()
             .then(result => $(".dataTdl").html(result.result) )
             .catch(result => console.log(result))
     } )
+
+
+    $(".profileButton").on( "click", () => {
+        $("body").load(`${url}/profile`);
+
+        let stateObj = { id: "100" };
+        window.history.replaceState(stateObj, "Profile User", `${url}/profile`);
+    } );
 
 
     $(".submitProfile").on( "click", () => {
@@ -249,14 +357,6 @@ $(document).ready(function ()
                 let stateObj = { id: "100" };
                 window.history.replaceState(stateObj, "Home", `${url}`);
             } );
-    } );
-
-
-    $(".profileButton").on( "click", () => {
-        $("body").load(`${url}/profile`);
-
-        let stateObj = { id: "100" };
-        window.history.replaceState(stateObj, "Profile User", `${url}/profile`);
     } );
 
 });

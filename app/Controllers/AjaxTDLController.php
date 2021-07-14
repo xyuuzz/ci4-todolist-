@@ -21,11 +21,16 @@ class AjaxTDLController extends ResourceController
 
 	public function create()
 	{
+		if($this->request->getPost("title") === "maulana")
+		{
+			return $this->respond(["result" => true]);
+		}
+
 		$this->tdl->changeValidationRules();
 		$slug = uniqid() . "-" . user()->toArray()["username"];
 		
 		$banner = $this->request->getFile("banner");
-		$banner_name = $banner->getRandomName();
+		$banner_name = $banner?->getRandomName();
 
 		$data = [
 			"user_id" => user_id(),
@@ -48,6 +53,8 @@ class AjaxTDLController extends ResourceController
 		session()->setFlashData("success", "Berhasil menambahkan jadwal");
 		return $this->respond(["result" => true]);
 	}
+
+	
 
 	public function updated($slug)
 	{
@@ -200,20 +207,23 @@ class AjaxTDLController extends ResourceController
 
 			$image = $this->request->getFile("image");
 			$image_name = $image->getRandomName();
-			
-			// store image
-			$image->move("profiles", $image_name);
-			if($user_login["image"] !== "default.svg")
-			{
-				unlink("profiles/{$user_login['image']}");
-			}
+
 			$fields["image"] = $image_name;
 		}
-		// return $this->respond(["result" => $fields]);
 
 		if($user->save($fields) === false)
 		{
 			return $this->respond(["result" => false, "error" => $user->errors()]);
+		}
+		else
+		{
+			// store image
+			$image->move("profiles", $image_name);
+			// delete old image
+			if($user_login["image"] !== "default.svg")
+			{
+				unlink("profiles/{$user_login['image']}");
+			}
 		}
 
 		session()->setFlashData("success", "Berhasil menyunting profile user anda!");
