@@ -149,7 +149,6 @@ function toHome()
 }
 
 
-
 $(document).ready(function ()
 {
     const url = "http://localhost:8080";
@@ -204,6 +203,7 @@ $(document).ready(function ()
                 // jika status code nya 200 / tidak error / berhasil
                 if(response.status === 200)
                 {
+                    $("title").html("Home"); 
                     $("body").load(`${url}`); // load halaman home
                     window.scrollTo(top); // pindah ke bagian atas
                 }
@@ -230,29 +230,30 @@ $(document).ready(function ()
 
     // jika el dengan class submit ditekan, 
     $(".submit").on("click", () => {
-        const formTdl = $(".dataForm");
-
-        let t0 = performance.now();
-        [...formTdl].forEach( (el, index) => {
-            // fetchData(`${url}/todolist/store`, "POST", `${url}`)
+        const formTdl =  $(".dataForm");
+        
+        [...formTdl].forEach(async el => {
             const data = new FormData(el);
             fetch(`${url}/todolist/store`, {
-                method : "POST",
-                body : data
+                method: "POST",
+                body: data
             })
-            .then(response => response.json())
+                .then(response => response.json())
                 .then(result => {
-                    
+
                     // jika property dari obj param result bernilai true
-                    if(result.result)
+                    if (result.result) 
                     {
-                        $(el).html(
-                            `
-                                <small>Form Berhasil Dibuat!</small>
-                            `
-                        );
+                        setTimeout( () => {
+                            $(el).html(
+                                `
+                                <div class="alert alert-success" role="alert">
+                                    Berhasil Menambahkan Form
+                                </div>
+                                `
+                            )}, 500);
                     }
-                    else
+                    else 
                     {
                         const name_input = ["banner", "title", "desc", "due_date"];
                         name_input.map(name => {
@@ -269,21 +270,23 @@ $(document).ready(function ()
                             }
                         });
                     }
-                })
+
+                });
         });
-        let t1 = performance.now();
-        console.log(t0,t1);
+
+        $(".loadingGif").removeClass("d-none");
+
         setTimeout( () => {
-            console.log($(formTdl).find("input[name='row'").length)
-            console.log($("input").hasClass("is-invalid"))
-            // if(formTdl.length === 1 && $("input").hasClass("is-invalid") )
-            // {
-            //     $("body").load(`${url}`);
-            //     let stateObj = { id: "100" };
-            //     window.history.replaceState(stateObj, "Page Website", `${url}`);
-            // }
-            // else{console.log("gagal")}
-        }, );
+            $(".loadingGif").addClass("d-none");
+            // const 
+            console.log( $(formTdl).find("input[name='row'").length,  $("input").hasClass("is-invalid"))
+            if(! $(formTdl).find("input[name='row'").length && ! $("input").hasClass("is-invalid") )
+            {
+                $("body").load(`${url}`);
+                let stateObj = { id: "100" };
+                window.history.replaceState(stateObj, "Page Website", `${url}`);
+            }
+        }, 1000);
     });
 
 

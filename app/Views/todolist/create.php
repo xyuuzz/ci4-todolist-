@@ -12,9 +12,10 @@
     </div>
 <?php endif; ?>
 
-<div class="card shadow border-bottom-dark ">
+
+<div class="card shadow border-bottom-dark">
     <div class="card-header">
-        <h5><b><?= session("edit") ? "Sunting Jadwal" : "Buat Jadwal" ?></b></h5>
+        <h5 class="d-inline"><b><?= session("edit") ? "Sunting Jadwal" : "Buat Jadwal" ?></b></h5>
     </div>
     <div class="card-body border-top-primary container-fluid">
         <div class="d-lg-flex justify-content-between">
@@ -74,15 +75,16 @@
             </form>
         </div>
 
+        <img class="d-none loadingGif" src="<?= base_url() ?>/img/loading.gif" alt="loading" width="100">
+
         <?php if(!session("edit")) : ?>
             <button type="button" class="btn btn-info d-block mb-3 mt-5 " onclick="addRow(this)">
                 Tambahkan Form Jadwal
             </button>
         <?php endif; ?>
-        
-        <!-- untuk insert batch kita garap besok saja -->
 
-        <button type="button" class="btn btn-primary <?= session("edit") ? "update" : "submit float-lg-right" ?>" 
+
+        <button type="button" class="btn btn-primary <?= session("edit") ? "update" : "submit " ?> " 
         <?= session("edit") ? "data-tdl={$tdl['slug']}" : "" ?> >
             <?= session("edit") ? "Sunting" : "Buat" ?>
         </button>

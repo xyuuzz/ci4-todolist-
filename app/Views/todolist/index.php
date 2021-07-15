@@ -32,7 +32,7 @@
                     <div class="d-lg-flex">
                         <img class="img-thumbnail" src="<?= base_url() ?>/banners/<?= $tdl["banner"] ?>" alt="thumbnail jadwal" width="300">
                         <div class="ml-lg-5 mt-3">
-                            <p><b>Deskripsi Jadwal :</b> <?= $tdl["desc"] ?></p>
+                            <p class="col-lg-12"><b>Deskripsi Jadwal :</b> <?= $tdl["desc"] ?></p>
                         </div>
                     </div>
                     <div class="float-lg-right mt-sm-3">
