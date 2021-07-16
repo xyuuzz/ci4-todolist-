@@ -38,7 +38,7 @@
                     <div class="float-lg-right mt-sm-3">
                         <!-- <button class="btn btn-danger btn-sm delete-tdl" data-tdl="<?= $tdl["slug"] ?>">Hapus</button>
                         <button class="btn btn-primary btn-sm update-tdl" data-tdl="<?= $tdl["slug"] ?>">Sunting</button> -->
-                        <button class="btn btn-outline-info btn-sm show-tdl mr-4" data-tdl="<?= $tdl["slug"] ?>">Detail</button>
+                        <button class="btn btn-outline-info btn-sm mr-4" data-tdl="<?= $tdl["slug"] ?>" onclick="showTdl(this)">Detail</button>
                     </div>
                 </div>
             </div>

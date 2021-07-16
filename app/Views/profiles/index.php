@@ -43,7 +43,7 @@
                 <input name="password" id="password" type="text" class="form-control form-control-user " placeholder="Ketik password baru">
             </div>
             
-            <button type="submit" class="btn btn-outline-primary float-right mt-3 submitProfile">Simpan</button>
+            <button type="submit" class="btn btn-outline-primary float-right mt-3 updateProfile">Simpan</button>
         </form>
     </div>
 </div>

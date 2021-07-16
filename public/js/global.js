@@ -56,6 +56,18 @@ function clickPaginate(el)
     window.history.replaceState(stateObj, "pagination", final_url);
 }
 
+function showTdl(e)
+{
+    const url = "http://localhost:8080";
+
+    const slug = $(e).data("tdl");
+    $("body").load(`${url}/show/detail/${slug}`);
+    $("title").html("Detail Jadwal"); 
+
+    let stateObj = { id: "100" };
+    window.history.replaceState(stateObj, "Page", `${url}/show/detail/${slug}`);
+}
+
 function addRow(el)
 {
     let el_tambahan = ``;
@@ -148,6 +160,51 @@ function toHome()
     window.history.replaceState(stateObj, "Home", "http://localhost:8080");
 }
 
+async function loopForm(formTdl, url)
+{
+    return await [...formTdl].map( async el => {
+        const data = new FormData(el);
+        return await fetch(`${url}/todolist/store`, {
+            method: "POST",
+            body: data
+        })
+            .then(response => response.json())
+            .then(result => {
+
+                // jika property dari obj param result bernilai true
+                if (result.result) 
+                {
+                    setTimeout( () => {
+                        $(el).html(
+                            `
+                                <div class="alert alert-success" role="alert">
+                                    Berhasil Menambahkan Form
+                                </div>
+                            `
+                        )}, 500);
+                }
+                else 
+                {
+                    const name_input = ["banner", "title", "desc", "due_date"];
+                    name_input.map(name => {
+                        // kita spread key dari obeject result.error, dan kita masukan ke dalam array
+                        // jika name pada nama_input ada pada obj result.error
+                        const type_input = name != "desc" ? "input" : "textarea";
+
+                        if ([...Object.keys(result.error)].indexOf(name) !== -1) {
+                            // tambahkan class is-invalid
+                            $(el).find(`${type_input}[name='${name}']`).addClass("is-invalid");
+                        } else {
+                            // hapus class is-invalid
+                            $(el).find(`${type_input}[name='${name}']`).removeClass("is-invalid");
+                        }
+                    });
+                }
+                return result.result;
+            });
+    });
+}
+
 
 $(document).ready(function ()
 {
@@ -229,83 +286,43 @@ $(document).ready(function ()
 
 
     // jika el dengan class submit ditekan, 
-    $(".submit").on("click", () => {
+    $(".submit").on("click", async () => {
         const formTdl =  $(".dataForm");
         
-        [...formTdl].forEach(async el => {
-            const data = new FormData(el);
-            fetch(`${url}/todolist/store`, {
-                method: "POST",
-                body: data
-            })
-                .then(response => response.json())
-                .then(result => {
-
-                    // jika property dari obj param result bernilai true
-                    if (result.result) 
-                    {
-                        setTimeout( () => {
-                            $(el).html(
-                                `
-                                <div class="alert alert-success" role="alert">
-                                    Berhasil Menambahkan Form
-                                </div>
-                                `
-                            )}, 500);
-                    }
-                    else 
-                    {
-                        const name_input = ["banner", "title", "desc", "due_date"];
-                        name_input.map(name => {
-                            // kita spread key dari obeject result.error, dan kita masukan ke dalam array
-                            // jika name pada nama_input ada pada obj result.error
-                            const type_input = name != "desc" ? "input" : "textarea";
-
-                            if ([...Object.keys(result.error)].indexOf(name) !== -1) {
-                                // tambahkan class is-invalid
-                                $(el).find(`${type_input}[name='${name}']`).addClass("is-invalid");
-                            } else {
-                                // hapus class is-invalid
-                                $(el).find(`${type_input}[name='${name}']`).removeClass("is-invalid");
-                            }
-                        });
-                    }
-
-                });
-        });
-
+        // * jika ditekan tombolnya, animasi loading akan langsung keluar
         $(".loadingGif").removeClass("d-none");
 
-        setTimeout( () => {
-            $(".loadingGif").addClass("d-none");
-            // const 
-            console.log( $(formTdl).find("input[name='row'").length,  $("input").hasClass("is-invalid"))
-            if(! $(formTdl).find("input[name='row'").length && ! $("input").hasClass("is-invalid") )
-            {
-                $("body").load(`${url}`);
-                let stateObj = { id: "100" };
-                window.history.replaceState(stateObj, "Page Website", `${url}`);
-            }
-        }, 1000);
+        // ! panggil fungsi loopForm dengan keyword await, karena hasil return fungsi loopForm adalah promise maka kita bisa menggunakan method then agar hasil/return valuenya bisa diproses
+        const result = await loopForm(formTdl, url).then(result1 => {
+            /* 
+                * 1. disini result1 bernilai array, yang isinya adalah obj promise, jika kita ingin mengambil semua value nya, maka dibutuhkan method all,
+                * 2. karena masih berbentuk obj promise, maka kita masih dapat menggunakan method then, disini kita akan membungkus array hasil dari obj promise result1 ke dalam promise lagi, tetapi dengan format 1 promise yang membungkus array,
+                * 3. karena masih berbentuk promise, kita masih dapat menggunakan method then. Lalu value dari result2 adalah array yang berasal dari value obj promise dari result1.
+            */
+            Promise.all(result1)
+                .then( response => response.map(response => response) )
+                .then(result2 => {
+                    $(".loadingGif").addClass("d-none");
+                    if( result2.indexOf(false) === -1 )
+                    {
+                        $("body").load(`${url}`);
+                        let stateObj = { id: "100" };
+                        window.history.replaceState(stateObj, "Page Website", `${url}`);
+
+                        window.scrollTo(top); 
+                    }
+                } );
+        } );
     });
 
-
-    $(".show-tdl").on( "click", e => {
-        const slug = $(e.target).data("tdl");
-        $("body").load(`${url}/show/detail/${slug}`);
-        $("title").html("Detail Jadwal"); 
-
-        let stateObj = { id: "100" };
-        window.history.replaceState(stateObj, "Page", `${url}/show/detail/${slug}`);
-    } )
-
-
+    // update data tdl
     $(".update").on( "click", e => {
         const slug = $(e.target).data("tdl");
         fetchData(`${url}/todolist/update/${slug}`, "POST", `${url}/show/detail/${slug}`);
     } );
 
 
+    // search data tdl
     $(".searchInput").on( "keyup", function() {
         fetch(`${url}/search/todolist/${$(this).val()}`, {
             method : "POST",
@@ -316,6 +333,7 @@ $(document).ready(function ()
     } )
 
 
+    // ke halaman profile
     $(".profileButton").on( "click", () => {
         $("body").load(`${url}/profile`);
 
@@ -324,7 +342,8 @@ $(document).ready(function ()
     } );
 
 
-    $(".submitProfile").on( "click", () => {
+    // update profile
+    $(".updateProfile").on( "click", () => {
         let data = new FormData( $("form.profileForm")[0] );
         
         fetch(`${url}/profile/update`, {

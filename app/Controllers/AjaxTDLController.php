@@ -21,10 +21,10 @@ class AjaxTDLController extends ResourceController
 
 	public function create()
 	{
-		// if($this->request->getPost("title") === "maulana")
-		// {
-		// 	return $this->respond(["result" => true]);
-		// }
+		if($this->request->getPost("title") === "aku")
+		{
+			return $this->respond(["result" => true]);
+		}
 
 		$this->tdl->changeValidationRules();
 		$slug = uniqid() . "-" . user()->toArray()["username"];
@@ -53,8 +53,6 @@ class AjaxTDLController extends ResourceController
 		session()->setFlashData("success", "Berhasil menambahkan jadwal");
 		return $this->respond(["result" => true]);
 	}
-
-	
 
 	public function updated($slug)
 	{
@@ -134,9 +132,9 @@ class AjaxTDLController extends ResourceController
 								</div>
 							</div>
 							<div class="float-lg-right mt-sm-3">
-								<!-- <button class="btn btn-danger btn-sm delete-tdl" data-tdl="' . $tdl->slug . '">Hapus</button>
-								<button class="btn btn-primary btn-sm update-tdl" data-tdl="' . $tdl->slug . '">Sunting</button> -->
-								<button class="btn btn-outline-info btn-sm show-tdl mr-4" data-tdl="' . $tdl->slug . '">Detail</button>
+							<button class="btn btn-outline-info btn-sm show-tdl mr-4" data-tdl="' . $tdl->slug . '" onclick="showTdl(this)"> 
+								Detail
+							</button>
 							</div>
 						</div>
 					</div>
@@ -172,10 +170,9 @@ class AjaxTDLController extends ResourceController
 								</div>
 							</div>
 							<div class="float-lg-right mt-sm-3">
-								<!-- <button class="btn btn-danger btn-sm delete-tdl" data-tdl="' . $tdl["slug"] . '">Hapus</button>
-								<button class="btn btn-primary btn-sm update-tdl" data-tdl="' . $tdl["slug"] . '">Sunting</button> -->
-								<button class="btn btn-outline-info btn-sm show-tdl mr-4" data-tdl="' . 
-								$tdl["slug"] . '">Detail</button>
+								<button class="btn btn-outline-info btn-sm show-tdl mr-4" data-tdl="' . $tdl["slug"] . '" onclick="showTdl(this)">
+									Detail
+								</button>
 							</div>
 						</div>
 					</div>
@@ -217,12 +214,15 @@ class AjaxTDLController extends ResourceController
 		}
 		else
 		{
-			// store image
-			$image->move("profiles", $image_name);
-			// delete old image
-			if($user_login["image"] !== "default.svg")
+			if(isset($image))
 			{
-				unlink("profiles/{$user_login['image']}");
+				// store image
+				$image->move("profiles", $image_name);
+				// delete old image
+				if($user_login["image"] !== "default.svg")
+				{
+					unlink("profiles/{$user_login['image']}");
+				}
 			}
 		}
 
