@@ -21,11 +21,6 @@ class AjaxTDLController extends ResourceController
 
 	public function create()
 	{
-		if($this->request->getPost("title") === "aku")
-		{
-			return $this->respond(["result" => true]);
-		}
-
 		$this->tdl->changeValidationRules();
 		$slug = uniqid() . "-" . user()->toArray()["username"];
 		

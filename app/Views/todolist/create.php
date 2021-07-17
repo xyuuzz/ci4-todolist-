@@ -19,13 +19,13 @@
     </div>
     <div class="card-body border-top-primary container-fluid">
         <div class="d-lg-flex justify-content-between">
-            <form class="user dataForm col-lg-6" enctype="multipart/form-data" method="POST" action="#">
+            <form class="user dataForm col-lg-6" enctype="multipart/form-data" method="POST" action="#" data-row="1" data-submit=false>
                 <?= csrf_field() ?>
 
                 <?php if(session("edit")) : ?>
                     <input type="hidden" name="_method" value="PATCH">
                 <?php else : ?>
-                    <input type="hidden" name="row" value="1">
+                    <!-- <input type="hidden" name="row" value="1"> -->
                 <?php endif; ?>
                 
                 <div class="form-group">

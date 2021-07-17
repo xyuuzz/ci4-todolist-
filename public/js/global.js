@@ -71,8 +71,10 @@ function showTdl(e)
 function addRow(el)
 {
     let el_tambahan = ``;
-    let length = $("input[name='row']").length;
-    let row = parseInt( $("input[name='row']")[length-1].value );
+    // let length = $("input[name='row']").length;
+    // let row = parseInt( $("input[name='row']")[length-1].value );
+    let length = $("form.dataForm").length;
+    let row = parseInt( $($("form.dataForm")[length-1]).data("row") );
 
     // jika row/jumlah form (sebelum dipencet tombol nya) adalah genap 
     if(row % 2) 
@@ -80,7 +82,7 @@ function addRow(el)
         el_tambahan += 
         `
         <hr>
-        <form class="user dataForm col-lg-6" enctype="multipart/form-data" method="POST" action="#">
+        <form class="user dataForm col-lg-6" enctype="multipart/form-data" method="POST" action="#" data-row="${1 + row}" data-submit=false>
             <input type="hidden" name="row" value="${1 + row}">
             <div class="form-group">
                 <label for="banner">Gambar Tugas</label>
@@ -106,14 +108,14 @@ function addRow(el)
         </form>
         `;
         // tambahkan el diatas setelah el yang memiliki class dataForm dengan index row-1, intinya akan dikasih di sebelahnya
-        $( $(".dataForm")[row-1] ).after(el_tambahan);
+        $( $("form.dataForm")[row-1] ).after(el_tambahan);
     }
     else
     {
         el_tambahan += 
         `
             <div class="d-lg-flex justify-content-between">
-                <form class="user dataForm col-lg-6" enctype="multipart/form-data" method="POST" action="#">
+                <form class="user dataForm col-lg-6" enctype="multipart/form-data" method="POST" action="#" data-row="${1 + row}" data-submit=false>
                     <input type="hidden" name="row" value="${1 + row}" class="rowCount">
                     <div class="form-group">
                         <label for="banner">Gambar Tugas</label>
@@ -174,14 +176,16 @@ async function loopForm(formTdl, url)
                 // jika property dari obj param result bernilai true
                 if (result.result) 
                 {
-                    setTimeout( () => {
-                        $(el).html(
-                            `
-                                <div class="alert alert-success" role="alert">
-                                    Berhasil Menambahkan Form
-                                </div>
-                            `
-                        )}, 500);
+                    // ganti value data bernama submit yang ada di el, dengan nilai true
+                    $(el).data("submit", true);
+
+                    $(el).html(
+                        `
+                            <div class="alert alert-success mt-4 mb-4" role="alert">
+                                Berhasil Menambahkan Form ke-${$(el).data("row")}
+                            </div>
+                        `
+                    );
                 }
                 else 
                 {
@@ -287,7 +291,7 @@ $(document).ready(function ()
 
     // jika el dengan class submit ditekan, 
     $(".submit").on("click", async () => {
-        const formTdl =  $(".dataForm");
+        const formTdl =  Object.values($("form.dataForm")).filter(el => $(el).data("submit") === false ) ;
         
         // * jika ditekan tombolnya, animasi loading akan langsung keluar
         $(".loadingGif").removeClass("d-none");
@@ -303,6 +307,7 @@ $(document).ready(function ()
                 .then( response => response.map(response => response) )
                 .then(result2 => {
                     $(".loadingGif").addClass("d-none");
+
                     if( result2.indexOf(false) === -1 )
                     {
                         $("body").load(`${url}`);
